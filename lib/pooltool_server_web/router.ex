@@ -13,7 +13,8 @@ defmodule PooltoolServerWeb.Router do
     end
 
     scope "/auth" do
-      post "/signUp", UserController, :sign_up
+      post "/sign-up", UserController, :sign_up
+      post "/sign-in", UserController, :sign_in
     end
   end
 

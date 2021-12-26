@@ -40,8 +40,8 @@ defmodule PooltoolServerWeb do
       def from_result({:ok, result}),
         do: create_result(:ok, result, nil)
 
-      @spec from_result({:error, {atom, String.t()}}) :: result
-      def from_result({:error, {code, message}}),
+      @spec from_result({:error, atom, String.t()}) :: result
+      def from_result({:error, code, message}),
         do: create_result(code, nil, message)
     end
   end
