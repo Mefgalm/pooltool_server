@@ -1,9 +1,8 @@
 defmodule PooltoolServer.Jwt do
   use Joken.Config
 
-  @spec email_confirmation(String.t()) :: String.t()
-  def email_confirmation(email) do
-    claims = %{"email" => email, "type" => :email_confirmation}
-    generate_and_sign!(claims)
+  @impl true
+  def token_config do
+    default_claims(iss: "PooltoolServer", aud: "PooltoolServer")
   end
 end

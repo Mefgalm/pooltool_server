@@ -9,11 +9,12 @@ defmodule PooltoolServer.Entity.User do
     field(:email, :string)
     field(:password, :string, virtual: true)
     field(:password_hash, :string, redact: true)
+    field(:email_confirmed, :boolean)
     field(:created_at, :utc_datetime)
   end
 
   def insert_changeset(user, params \\ %{}) do
-    fields = ~w(email password created_at)a
+    fields = ~w(email password email_confirmed created_at)a
 
     user
     |> cast(params, fields)
@@ -22,7 +23,8 @@ defmodule PooltoolServer.Entity.User do
     |> validate_format(
       :password,
       ~r"^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()№:?[\]\-_~/\.,])[a-zA-Z\d!@#$%^&*()№:?[\]\-_~/\.,]{8,}$",
-      message: "Password should be at least 8 characters and contains one lowercase, one uppercase and one special character."
+      message:
+        "Password should be at least 8 characters and contains one lowercase, one uppercase and one special character."
     )
     |> put_pass_hash()
     |> unique_constraint(:email)
@@ -31,5 +33,9 @@ defmodule PooltoolServer.Entity.User do
   defp put_pass_hash(changeset) do
     password = get_field(changeset, :password)
     put_change(changeset, :password_hash, Pbkdf2.hash_pwd_salt(password))
+  end
+
+  def change_email_confirmed(user, email_confirmed) do
+    change(user, %{email_confirmed: email_confirmed})
   end
 end

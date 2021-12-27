@@ -1,5 +1,5 @@
 defmodule Result do
-  @errors ~w(validation invalid_email_or_password)a
+  @errors ~w(validation invalid_email_or_password invalid_confirmation_token)a
 
   @type error:: {:error, atom, String.t()}
 

@@ -1,18 +1,6 @@
 defmodule PooltoolServer.UserDomain do
   alias PooltoolServer.Entity.User
 
-  @spec validate_password(String.t()) :: Result.t()
-  defp validate_password(password) do
-    if String.match?(
-         password,
-         ~r"^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()№:?[\]\-_~/\.,])[a-zA-Z\d!@#$%^&*()№:?[\]\-_~/\.,]{8,}$"
-       ) do
-      :ok
-    else
-      Result.error!(:validation, "Password invalid")
-    end
-  end
-
   @doc ~S"""
     Sign up
   """
@@ -22,6 +10,7 @@ defmodule PooltoolServer.UserDomain do
      %{
        email: email,
        password: password,
+       email_confirmed: false,
        created_at: utc_now
      }}
   end
