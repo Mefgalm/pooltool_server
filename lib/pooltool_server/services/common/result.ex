@@ -1,7 +1,7 @@
 defmodule Result do
-  @errors ~w(validation invalid_email_or_password invalid_confirmation_token)a
+  @errors ~w(validation invalid_email_or_password invalid_token)a
 
-  @type error:: {:error, atom, String.t()}
+  @type error :: {:error, atom, String.t()}
 
   @spec error!(atom, String.t()) :: error
   def error!(code, message) do
@@ -11,5 +11,7 @@ defmodule Result do
     end
   end
 
-
+  @spec map({:ok, any}, (any -> any)) :: {:ok, any}
+  def map({:ok, data}, f), do: {:ok, f.(data)}
+  def map(x, _), do: x
 end

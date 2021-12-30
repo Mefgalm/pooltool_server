@@ -1,10 +1,32 @@
 defmodule PooltoolServer.UserDomain do
+  alias DateTime.Extensions, as: DateTimeExt
   alias PooltoolServer.Entity.User
+  alias PooltoolServer.Jwt
 
-  @doc ~S"""
-    Sign up
-  """
-  @spec sign_up(String.t(), String.t(), DataTime.t()) :: {:ok, map} | Result.error()
+  @email_confirmation_type "email_confirmation"
+  @forgot_password_type "forgot_password"
+  @email_token_hours_valid Application.fetch_env!(:pooltool_server, :email_token_hours_valid)
+
+  @spec generate_email_confirm_token(String.t(), DateTime.t()) :: String.t()
+  defp generate_email_confirm_token(email, utc_now) do
+    claims = %{
+      "email" => email,
+      "type" => @email_confirmation_type,
+      "exp" => utc_now |> DateTimeExt.add_hours_to_unix(@email_token_hours_valid)
+    }
+
+    Jwt.generate_and_sign!(claims)
+  end
+
+  defp verify_and_get_claims(token, type) do
+    with {:ok, %{"type" => ^type} = claims} <- Jwt.verify_and_validate(token) do
+      {:ok, claims}
+    else
+      _ -> Result.error!(:invalid_token, "Invalid Token")
+    end
+  end
+
+  @spec sign_up(String.t(), String.t(), DataTime.t()) :: {:ok, map, String.t()} | Result.error()
   def sign_up(email, password, utc_now) do
     {:ok,
      %{
@@ -12,23 +34,8 @@ defmodule PooltoolServer.UserDomain do
        password: password,
        email_confirmed: false,
        created_at: utc_now
-     }}
+     }, generate_email_confirm_token(email, utc_now)}
   end
-
-  @doc ~S"""
-    SignIn
-
-    ## Examples
-      iex> PooltoolServer.UserDomain.sign_in(nil, "12345678Aa!")
-      {:error, :invalid_email_or_password, "Invalid email or password"}
-
-      iex> PooltoolServer.UserDomain.sign_in(%PooltoolServer.Entity.User{password_hash: "$pbkdf2-sha512$1$a2Xf41B4MJsYKi9NYyOM8w$KFgmieUuhUdLThIYMbozHvVatbytOdfk36.KC90oIW1vidrgmHSSoNkzxYSfpWpgmBY.BfDO4xWA4XBuSFrtyw"}, "12345678Aa!")
-      :ok
-
-      iex> PooltoolServer.UserDomain.sign_in(%PooltoolServer.Entity.User{password_hash: "$pbkdf2-sha512$1$a2Xf41B4MJsYKi9NYyOM8w$KFgmieUuhUdLThIYMbozHvVatbytOdfk36.KC90oIW1vidrgmHSSoNkzxYSfpWpgmBY.BfDO4xWA4XBuSFrtyw"}, "12345678Aa!___")
-      {:error, :invalid_email_or_password, "Invalid email or password"}
-
-  """
 
   @spec sign_in(%User{} | nil, String.t()) :: :ok | Result.error()
   def sign_in(user, password) do
@@ -45,6 +52,31 @@ defmodule PooltoolServer.UserDomain do
         else
           invalid_email_or_password_error
         end
+    end
+  end
+
+  @spec verify_and_get_email_confirmation(String.t()) :: {:ok, String.t()} | Result.error()
+  def verify_and_get_email_confirmation(token) do
+    with {:ok, %{"email" => email}} <- verify_and_get_claims(token, @email_confirmation_type) do
+      {:ok, email}
+    end
+  end
+
+  @spec generate_forgot_password_token(String.t(), DateTime.t()) :: String.t()
+  def generate_forgot_password_token(email, utc_now) do
+    claims = %{
+      "type" => @forgot_password_type,
+      "exp" => utc_now |> DateTimeExt.add_hours_to_unix(@email_token_hours_valid),
+      "email" => email
+    }
+
+    Jwt.generate_and_sign!(claims)
+  end
+
+  @spec verify_and_get_forgot_password(String.t()) :: {:ok, map()} | Result.error()
+  def verify_and_get_forgot_password(token) do
+    with {:ok, %{"email" => email}} <- verify_and_get_claims(token, @forgot_password_type) do
+      {:ok, email}
     end
   end
 end

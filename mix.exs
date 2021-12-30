@@ -46,7 +46,8 @@ defmodule PooltoolServer.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:pbkdf2_elixir, "~> 1.4"},
       {:bamboo, "~> 2.2"},
-      {:joken, "~> 2.4"}
+      {:joken, "~> 2.4"},
+      {:cors_plug, "~> 2.0"}
     ]
   end
 

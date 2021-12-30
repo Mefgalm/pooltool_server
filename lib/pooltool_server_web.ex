@@ -36,6 +36,10 @@ defmodule PooltoolServerWeb do
         }
       end
 
+      @spec from_result(:ok) :: result
+      def from_result(:ok),
+        do: create_result(:ok, nil, nil)
+
       @spec from_result({:ok, any}) :: result
       def from_result({:ok, result}),
         do: create_result(:ok, result, nil)
