@@ -37,7 +37,6 @@ defmodule PooltoolServer.Entity.User do
 
   defp put_pass_hash(changeset) do
     password = get_field(changeset, :password)
-    IO.inspect(password)
     put_change(changeset, :password_hash, Pbkdf2.hash_pwd_salt(password))
   end
 

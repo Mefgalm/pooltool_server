@@ -51,11 +51,11 @@ defmodule PooltoolServer.UserService do
 
   @spec reset_password(String.t(), String.t()) :: {:ok, %User{}} | Result.error()
   def reset_password(new_password, token) do
-    {:ok, email} = UserDomain.verify_and_get_forgot_password(token)
-
-    Repo.get_by(User, email: email)
-    |> User.change_set_new_password(new_password)
-    |> Repo.update()
-    |> Repo.handle_changset_error()
+    with {:ok, email} <- UserDomain.verify_and_get_forgot_password(token) do
+      Repo.get_by(User, email: email)
+      |> User.change_set_new_password(new_password)
+      |> Repo.update()
+      |> Repo.handle_changset_error()
+    end
   end
 end

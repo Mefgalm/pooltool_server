@@ -22,7 +22,7 @@ defmodule PooltoolServer.UserDomain do
     with {:ok, %{"type" => ^type} = claims} <- Jwt.verify_and_validate(token) do
       {:ok, claims}
     else
-      _ -> Result.error!(:invalid_token, "Invalid Token")
+      _ -> Result.error!(:invalid_token, "Invalid token")
     end
   end
 
